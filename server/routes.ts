@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, requireAuth, requireAdmin, requireCompanyAccess } from "./auth";
+import { setupAuth, requireAuth, requireAdmin, requireCompanyAccess, hashPassword, comparePasswords } from "./auth";
 import { z } from "zod";
 import { 
   insertUserSchema, 

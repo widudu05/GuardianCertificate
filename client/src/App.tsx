@@ -7,6 +7,7 @@ import CertificatesPage from "@/pages/certificates-page";
 import CompaniesPage from "@/pages/companies-page";
 import UsersPage from "@/pages/users-page";
 import LogsPage from "@/pages/logs-page";
+import SettingsPage from "@/pages/settings-page";
 import { useAuth } from "./hooks/use-auth";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
       <ProtectedRoute path="/companies" component={CompaniesPage} />
       <ProtectedRoute path="/users" component={UsersPage} />
       <ProtectedRoute path="/logs" component={LogsPage} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
