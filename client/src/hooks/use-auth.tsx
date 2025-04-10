@@ -9,6 +9,7 @@ import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@/types";
 import { z } from "zod";
+import { useLocation } from "wouter";
 
 type AuthContextType = {
   user: User | null;
@@ -34,6 +35,8 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
+  
   const {
     data: user,
     error,
@@ -63,8 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Login realizado com sucesso",
-        description: `Bem-vindo, ${user.name}!`,
+        description: `Bem-vindo, ${user.name || "Administrador do Sistema"}!`,
       });
+      // Redirecionamento forçado para a página principal após o login
+      setTimeout(() => {
+        navigate("/");
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
@@ -88,6 +95,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Conta criada com sucesso",
         description: `Bem-vindo, ${user.name}!`,
       });
+      // Redirecionamento forçado para a página principal após o registro
+      setTimeout(() => {
+        navigate("/");
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
@@ -108,6 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Logout realizado com sucesso",
         description: "Você foi desconectado com sucesso",
       });
+      // Redirecionamento forçado para a página de autenticação após o logout
+      navigate("/auth");
     },
     onError: (error: Error) => {
       toast({
