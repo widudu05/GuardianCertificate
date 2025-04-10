@@ -1,0 +1,77 @@
+Prompt: Guardião de Certificados Digitais - SaaS Completo de Gestão de Certificados A1 e A3 em Nuvem
+
+Crie um SaaS chamado Guardião de Certificados Digitais, voltado para o armazenamento seguro, controle e gestão de certificados digitais dos tipos A1 e A3. A aplicação deve ter uma interface intuitiva, com funcionalidades robustas de segurança e controle de vencimentos. Abaixo estão os requisitos completos:
+
+🔐 Funcionalidades Principais:
+Cadastro de Certificados Digitais (A1 e A3)
+
+Upload e armazenamento criptografado do certificado A1 (.pfx) e dados do A3.
+
+Campos obrigatórios: nome do certificado, CNPJ/CPF, tipo (A1 ou A3), data de emissão, data de vencimento, senha do certificado.
+
+Armazenamento seguro em nuvem com criptografia ponta-a-ponta.
+
+Gestão de Senhas e Segurança
+
+Senhas dos certificados devem ser armazenadas de forma segura e criptografada.
+
+Permitir a visualização da senha apenas mediante autenticação dupla (2FA).
+
+Logs de acesso às senhas (quem visualizou e quando).
+
+Controle de Validade e Alertas Inteligentes
+
+Painel com status dos certificados (válido, próximo ao vencimento, vencido).
+
+Envio automático de alertas por e-mail, WhatsApp e/ou sistema interno 30, 15, 7 e 1 dia antes do vencimento.
+
+Possibilidade de configurar usuários adicionais para receber os alertas.
+
+Relação de Sistemas e Sites que Utilizam o Certificado
+
+Campo para listar os sistemas e sites (URL, nome, finalidade) que utilizam cada certificado.
+
+Campo para observações técnicas ou instruções de uso do certificado em cada sistema.
+
+Painel do Administrador
+
+Cadastro e gerenciamento de usuários.
+
+Permissões personalizadas (visualizar apenas, editar, excluir, visualizar senha).
+
+Dashboard com visão geral de todos os certificados cadastrados por empresa ou cliente.
+
+Multiempresa (caso B2B)
+
+Permitir que um administrador gerencie múltiplas empresas ou CNPJs.
+
+Cada empresa com seus próprios certificados, prazos e alertas.
+
+Logs e Auditoria
+
+Registro de todas as ações: uploads, edições, exclusões, visualização de senhas, etc.
+
+Filtro por usuário, data, tipo de ação.
+
+Backup Automático e Criptografia
+
+Backups diários dos certificados armazenados.
+
+Criptografia AES-256 para dados sensíveis.
+
+🧑‍💻 Tecnologias sugeridas (opcional, se for usar em briefing técnico):
+Backend: Node.js / Python / Bubble (no-code)
+
+Banco de Dados: PostgreSQL / Firebase / MongoDB
+
+Frontend: React.js ou plataforma no-code
+
+Segurança: Criptografia AES-256, Autenticação 2FA, Certificados SSL, JWT
+
+Integrações: E-mail (SMTP), WhatsApp (Twilio ou Z-API), API de armazenamento seguro (como AWS S3 ou equivalente)
+
+🎯 Público-Alvo:
+Empresas de contabilidade, escritórios de advocacia, departamentos fiscais de médias e grandes empresas, prestadores de serviços que utilizam certificados digitais com frequência.
+
+📝 Observações Finais:
+O sistema deve ser responsivo, com suporte a dispositivos móveis e interface amigável. Idealmente, pode contar com uma API para integração futura com outros sistemas que utilizam o certificado (como ERP ou emissores de NF-e).
