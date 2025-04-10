@@ -9,8 +9,8 @@ import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@/types";
 import { z } from "zod";
-import { useLocation } from "wouter";
 
+// Definição dos tipos
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
@@ -20,7 +20,9 @@ type AuthContextType = {
   registerMutation: UseMutationResult<User, Error, RegisterData>;
 };
 
-// Extend schema to add password confirmation
+type LoginData = Pick<DbUser, "username" | "password">;
+
+// Schema de registro com confirmação de senha
 const registerSchema = insertUserSchema.extend({
   passwordConfirm: z.string(),
 }).refine(data => data.password === data.passwordConfirm, {
@@ -28,15 +30,23 @@ const registerSchema = insertUserSchema.extend({
   path: ["passwordConfirm"]
 });
 
-type LoginData = Pick<DbUser, "username" | "password">;
 type RegisterData = z.infer<typeof registerSchema>;
 
-export const AuthContext = createContext<AuthContextType | null>(null);
+// Contexto de autenticação
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isLoading: false,
+  error: null,
+  loginMutation: {} as UseMutationResult<User, Error, LoginData>,
+  logoutMutation: {} as UseMutationResult<void, Error, void>,
+  registerMutation: {} as UseMutationResult<User, Error, RegisterData>,
+});
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+// Provider de autenticação
+const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
-  const [, navigate] = useLocation();
   
+  // Buscar dados do usuário atual
   const {
     data: user,
     error,
@@ -57,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Mutation de login
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
@@ -68,10 +79,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Login realizado com sucesso",
         description: `Bem-vindo, ${user.name || "Administrador do Sistema"}!`,
       });
-      // Redirecionamento forçado para a página principal após o login
-      setTimeout(() => {
-        navigate("/");
-      }, 100);
+      
+      // Redirecionamento forçado
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({
@@ -82,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Mutation de registro
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
       // Remove passwordConfirm before sending to API
@@ -95,10 +106,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Conta criada com sucesso",
         description: `Bem-vindo, ${user.name}!`,
       });
-      // Redirecionamento forçado para a página principal após o registro
-      setTimeout(() => {
-        navigate("/");
-      }, 100);
+      
+      // Redirecionamento forçado
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({
@@ -109,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Mutation de logout
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", "/api/logout");
@@ -119,8 +130,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Logout realizado com sucesso",
         description: "Você foi desconectado com sucesso",
       });
-      // Redirecionamento forçado para a página de autenticação após o logout
-      navigate("/auth");
+      
+      // Redirecionamento forçado
+      window.location.href = "/auth";
     },
     onError: (error: Error) => {
       toast({
@@ -145,12 +157,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+// Hook para acessar o contexto de autenticação
+const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}
+};
+
+export { AuthProvider, useAuth };
