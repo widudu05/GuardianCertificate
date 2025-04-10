@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Bell, ChevronDown, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { useCompanyContext } from "@/hooks/use-company-context";
+import { Company } from "@/types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Company } from "@/types";
 import {
   Select,
   SelectContent,
@@ -25,15 +25,30 @@ import {
 export function Header() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
+  const { companies, selectedCompanyId, setSelectedCompanyId } = useCompanyContext();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Fetch companies for company selector
-  const { data: companies = [] } = useQuery<Company[]>({
-    queryKey: ["/api/companies"],
-  });
 
   const handleLogout = () => {
     logoutMutation.mutate();
+  };
+
+  const handleCompanyChange = (value: string) => {
+    const companyId = value ? parseInt(value) : null;
+    setSelectedCompanyId(companyId);
+    
+    // Mostrar toast para informar o usuário
+    if (companyId) {
+      const company = companies.find(c => c.id === companyId);
+      toast({
+        title: "Empresa selecionada",
+        description: `Mostrando dados de ${company?.name}`,
+      });
+    } else {
+      toast({
+        title: "Filtro removido",
+        description: "Mostrando dados de todas as empresas",
+      });
+    }
   };
 
   // Get user initials for avatar
@@ -74,11 +89,15 @@ export function Header() {
           
           {/* Company Selector */}
           <div className="hidden md:block">
-            <Select>
+            <Select 
+              onValueChange={handleCompanyChange}
+              value={selectedCompanyId ? selectedCompanyId.toString() : undefined}
+            >
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Selecione uma empresa" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="0">Todas as empresas</SelectItem>
                 {companies.map((company) => (
                   <SelectItem key={company.id} value={company.id.toString()}>
                     {company.name}
