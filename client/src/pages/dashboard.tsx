@@ -5,18 +5,37 @@ import { StatsCard } from "@/components/dashboard/stats-card";
 import { ExpiringCertificates } from "@/components/dashboard/expiring-certificates";
 import { ActivityLogList } from "@/components/dashboard/activity-log";
 import { AppLayout } from "@/layouts/app-layout";
+import { useCompanyContext } from "@/hooks/use-company-context";
 
 export default function Dashboard() {
+  const { selectedCompanyId } = useCompanyContext();
+  
   // Fetch dashboard stats
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
-    queryKey: ["/api/dashboard/stats"],
+    queryKey: ["/api/dashboard/stats", { companyId: selectedCompanyId }],
+    queryFn: async () => {
+      const url = selectedCompanyId && selectedCompanyId !== 0
+        ? `/api/dashboard/stats?companyId=${selectedCompanyId}`
+        : "/api/dashboard/stats";
+      
+      const res = await fetch(url, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch dashboard stats");
+      return await res.json();
+    },
   });
   
   // Fetch expiring certificates
   const { data: certificates = [], isLoading: certificatesLoading } = useQuery<Certificate[]>({
-    queryKey: ["/api/certificates", { expiringOnly: true }],
+    queryKey: ["/api/certificates", { expiringOnly: true, companyId: selectedCompanyId }],
     queryFn: async () => {
-      const res = await fetch("/api/certificates?expiringOnly=true", {
+      let url = "/api/certificates?expiringOnly=true";
+      if (selectedCompanyId && selectedCompanyId !== 0) {
+        url += `&companyId=${selectedCompanyId}`;
+      }
+      
+      const res = await fetch(url, {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch expiring certificates");
@@ -26,9 +45,14 @@ export default function Dashboard() {
   
   // Fetch recent activity logs
   const { data: logs = [], isLoading: logsLoading } = useQuery<ActivityLog[]>({
-    queryKey: ["/api/logs", { limit: 10 }],
+    queryKey: ["/api/logs", { limit: 10, companyId: selectedCompanyId }],
     queryFn: async () => {
-      const res = await fetch("/api/logs?limit=10", {
+      let url = "/api/logs?limit=10";
+      if (selectedCompanyId && selectedCompanyId !== 0) {
+        url += `&companyId=${selectedCompanyId}`;
+      }
+      
+      const res = await fetch(url, {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch activity logs");

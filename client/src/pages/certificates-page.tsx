@@ -12,6 +12,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { AppLayout } from "@/layouts/app-layout";
+import { useCompanyContext } from "@/hooks/use-company-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ import { getStatusBadgeColor, getStatusText, getCertificateStatus, formatDate, g
 import { cn } from "@/lib/utils";
 
 export default function CertificatesPage() {
+  const { selectedCompanyId } = useCompanyContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | undefined>(undefined);
@@ -32,7 +34,19 @@ export default function CertificatesPage() {
   
   // Fetch certificates
   const { data: certificates = [], isLoading } = useQuery<Certificate[]>({
-    queryKey: ["/api/certificates"],
+    queryKey: ["/api/certificates", { companyId: selectedCompanyId }],
+    queryFn: async () => {
+      let url = "/api/certificates";
+      if (selectedCompanyId && selectedCompanyId !== 0) {
+        url += `?companyId=${selectedCompanyId}`;
+      }
+      
+      const res = await fetch(url, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch certificates");
+      return await res.json();
+    },
   });
 
   const filteredCertificates = certificates.filter((cert) => 
