@@ -106,6 +106,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error deleting user", error });
     }
   });
+  
+  // Change password endpoint
+  app.post("/api/users/:id/change-password", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Only allow users to change their own password
+      if (userId !== req.user.id) {
+        return res.status(403).json({ message: "Você só pode alterar sua própria senha" });
+      }
+      
+      // Validate input
+      const changePasswordSchema = z.object({
+        currentPassword: z.string(),
+        newPassword: z.string().min(8, "A nova senha deve ter pelo menos 8 caracteres"),
+      });
+      
+      const validatedData = changePasswordSchema.parse(req.body);
+      
+      // Get user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      // Verify current password
+      const passwordValid = await comparePasswords(validatedData.currentPassword, user.password);
+      if (!passwordValid) {
+        return res.status(400).json({ message: "Senha atual incorreta" });
+      }
+      
+      // Hash new password
+      const hashedPassword = await hashPassword(validatedData.newPassword);
+      
+      // Update password
+      await storage.updateUser(userId, { password: hashedPassword });
+      
+      // Log activity
+      await storage.createActivityLog({
+        userId: req.user.id,
+        action: 'update',
+        entity: 'user',
+        entityId: userId,
+        details: { passwordChanged: true },
+        ipAddress: req.ip,
+      });
+      
+      res.json({ message: "Senha alterada com sucesso" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados de entrada inválidos", errors: error.errors });
+      }
+      res.status(500).json({ message: "Erro ao alterar senha", error });
+    }
+  });
 
   // Company routes
   app.get("/api/companies", requireAuth, async (req, res) => {
